@@ -14,6 +14,9 @@ Als startopdracht modelleren we twee fietsers. Doorloop de bovenstaande drie sta
 
 
 
+```python
+
+```
 
 ## Numerieke modellen
 Om een simulatie te maken, splitsen we het volledige proces op in kleine stappen met een vaste (tijd)interval, zoals in onderstaande figuur. Elk stapje krijgt een nummer, van $0$ tot $N$. We gebruiken de letter $i$ om naar een specifieke stap te verwijzen.
@@ -68,7 +71,7 @@ plt.plot(t,x_2,'b.', markersize=1, label='fietser 2')
 
 plt.show()
 
-
+print(x_1[np.where(t==10)], x_2[np.where(t==10)])
 ```
 
 Wat op zou kunnen vallen is dat de snelheid in een cel constant gehouden wordt ($x_i = v_i\cdot\Delta t$), terwijl de snelheid tijdens het tijdsinterval $\Delta t$ toeneemt. De oplossing is dus een benadering van de exacte oplossing, maar door deze methode (Euler explicit forward), moeten we wel voorzichtig zijn met de grootte van het tijdsinterval.
@@ -77,11 +80,53 @@ Wat op zou kunnen vallen is dat de snelheid in een cel constant gehouden wordt (
 Maak het tijdsinterval $dt$ groter en vergelijk de afgelegde weg in de tien seconde. Wat gebeurt er met de afgelegde weg als we $dt$ groter maken? Is dat logisch vanuit gezien de natuurkunde? En gezien de methode van discretisatie? Leg uit.
 ```
 
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Beginwaarden
+dt = 0.5                  #s
+t_e = 10                   #s
+N = int(t_e/dt)+1
+t = np.arange(0,t_e+dt,dt) #s
+
+# fietser 1
+x_1 = np.zeros(N)          #m     maakt array van lengte N met alleen maar waarde 0.
+v_1 = 5                    #m/s
+
+# fietser 2
+x_2 = np.zeros(N)          #m     
+v_2 = np.zeros(N)          #m/s     
+a_2 = .5                   #m/s^2     
+
+# Uitvoeren van de simulatie
+for i in range(0,N-1):
+    x_1[i+1] = x_1[i] + v_1*dt
+    
+    x_2[i+1] = x_2[i] + v_2[i]*dt
+    v_2[i+1] = v_2[i] + a_2*dt
+
+# Plotten van de gegevens.    
+plt.figure()
+
+plt.xlabel('$t$(s)')
+plt.ylabel('$x$(m)')
+
+plt.plot(t,x_1,'r.', markersize=1, label='fietser 1')
+plt.plot(t,x_2,'b.', markersize=1, label='fietser 2')
+
+plt.show()
+print(x_1[np.where(t==10)], x_2[np.where(t==10)])
+
+```
+
+De constante snelheid veranderd niet, terwijl de snelheid van de versnellende fietser wel verandered. Dit is logisch, want er zijn minder meetpunten, dus de accuratie zal lager zijn.
+
 
 <!-- Jouw antwoord hier  -->
 
 ```python
-%reset -f  #clears memory as we don't need it further down 
+%reset
 ```
 
 ## Naar een deeltjesmodel
@@ -97,7 +142,7 @@ Een *class* is een blauwdruk voor het creëren van objecten (zoals deeltjes, ato
 # Merk op dat de class zelf geen deeltje is! 
 # Een object dat tot een bepaalde class behoort, wordt een instant van die class genoemd. 
 # Je kunt meerdere instants van een class hebben.
-
+import numpy as np
 class ParticleClass:
     def __init__(self, m, v, r, R):
         self.m = m                         # massa van het deeltje
