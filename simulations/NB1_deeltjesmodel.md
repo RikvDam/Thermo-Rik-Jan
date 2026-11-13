@@ -335,38 +335,31 @@ array = np.array([])
 N = int(1e5)
 
 for i in range(N):
-    array = np.append(array,np.random.rand(N))
+    array = np.append(array,np.random.rand(1))
 
 eind = time.time()
-lengte = eind - start
+lengte1 = eind - start
 
-print("Dit kostte ", lengte, "seconde!")
+print("Dit kostte ", lengte1, "seconde!")
 ```
 
 ```python
 import time
 import numpy as np
+    
+start = time.time()
 
+array = np.array([])
 N = int(1e5)
 
-start_oud = time.time()
-array_oud = np.array([])
-for i in range(N):
-    array_oud = np.append(array_oud, np.random.rand(1))
-eind_oud = time.time()
-lengte_oud = eind_oud - start_oud
 
-start_nieuw = time.time()
-array_nieuw = np.random.rand(N)
-eind_nieuw = time.time()
-lengte_nieuw = eind_nieuw - start_nieuw
+array = np.append(array,np.random.rand(N))
 
-factor_korter = lengte_oud / lengte_nieuw
+eind = time.time()
+lengte = eind - start
 
-print("Oude methode kostte:", lengte_oud, "seconde!")
-print("Nieuwe methode kostte:", lengte_nieuw, "seconde!")
-print("De runtime is", factor_korter, "keer korter.")
-
+print("Dit kostte ", lengte, "seconde!")
+print(lengte1 - lengte, "Seconden verschil")
 ```
 
 Idealiter draaien we de bovenstaande code een aantal keer zodat we een goede schatting hebben van de rekentijd.
@@ -389,7 +382,7 @@ De runtime is {eval}`<naam variabele>` korter.
 ```
 
 ```python
-
+lengte
 ```
 
 ## Aan de slag met deeltjes
@@ -521,11 +514,11 @@ def init():
     return dot,
 
 # Update function for each frame
-def update(frame):
+""""def update(frame):
     particle.update_position()
     dot.set_data([particle.r[0]], [particle.r[1]])
     return dot,
-
+"""
 # Create animation
 ani = FuncAnimation(fig, update, frames=range(200), init_func=init, blit=True, interval=50)
 
@@ -549,6 +542,11 @@ Controleer je eigen antwoord door de functie hierboven even te vervangen door de
 def update(frame):
     particle.update_position()
     dot.set_data([particle.r[0]], [particle.r[1]])
+    if particle.r[0] > 10:
+        particle.r[0]= -10
+    if particle.r[0] <-10:
+        particle.r[0] = 10
+    
 ### YOUR CODE HERE ###
     return dot,         
 ```
