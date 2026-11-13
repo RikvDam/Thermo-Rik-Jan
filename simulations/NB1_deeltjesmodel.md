@@ -274,7 +274,53 @@ En als je wilt gaan voor een uitdaging:
 ```
 
 ```python
-### YOUR CODE HERE ###
+import numpy as np
+import matplotlib.pyplot as plt
+
+class ParticleclassR1:
+    def __init__(self, m, v, r):
+        self.m = m
+        self.v = np.array(v, dtype=float)
+        self.r = np.array(r, dtype=float)
+
+    def update_positionR1(self, dt):
+        self.r += self.v * dt
+
+n_deeltjes = 10
+dt = 0.25
+particle_arrayR1 = []
+
+x_start = []
+y_start = []
+
+for i in range(n_deeltjes):
+    start_x = float(i)
+    randomvx = np.random.uniform(-5, 5)
+
+    deeltje = ParticleclassR1(m=1, v=[randomvx, 0.0], r=[start_x, 0.0])
+    particle_arrayR1.append(deeltje)
+
+    x_start.append(deeltje.r[0])
+    y_start.append(deeltje.r[1])
+
+for deeltje in particle_arrayR1:
+    deeltje.update_positionR1(dt)
+
+x_eind = [p.r[0] for p in particle_arrayR1]
+y_eind = [p.r[1] for p in particle_arrayR1]
+
+plt.figure(figsize=(10, 4))
+plt.scatter(x_start, y_start, color="blue", s=80, label="Startpositie", zorder=3)
+plt.scatter(x_eind, y_eind, color="red", s=80, label="Eindpositie (na update)", zorder=3)
+
+
+
+plt.xlabel("X-positie")
+plt.ylabel("Y-positie")
+plt.title("Beweging van 10 deeltjes met behulp van ParticleClass (Oefening intro-ex-2)")
+plt.legend(loc="upper right")
+plt.grid(True, alpha=0.3)
+plt.show()
 ```
 
 Onze simulaties worden snel “zwaar”. Er moeten veel berekeningen gedaan worden en dat kost nu eenmaal tijd. Nu is het wel zo dat sommige berekeningen meer tijd kosten dan anderen. Om te kijken of een stukje code geoptimaliseerd kan worden, moeten we een timer maken. Dat kan met onderstaande code:
@@ -282,19 +328,45 @@ Onze simulaties worden snel “zwaar”. Er moeten veel berekeningen gedaan word
 ```python
 import time
 import numpy as np
-
+    
 start = time.time()
 
 array = np.array([])
 N = int(1e5)
 
 for i in range(N):
-    array = np.append(array,np.random.rand(1))
+    array = np.append(array,np.random.rand(N))
 
 eind = time.time()
 lengte = eind - start
 
 print("Dit kostte ", lengte, "seconde!")
+```
+
+```python
+import time
+import numpy as np
+
+N = int(1e5)
+
+start_oud = time.time()
+array_oud = np.array([])
+for i in range(N):
+    array_oud = np.append(array_oud, np.random.rand(1))
+eind_oud = time.time()
+lengte_oud = eind_oud - start_oud
+
+start_nieuw = time.time()
+array_nieuw = np.random.rand(N)
+eind_nieuw = time.time()
+lengte_nieuw = eind_nieuw - start_nieuw
+
+factor_korter = lengte_oud / lengte_nieuw
+
+print("Oude methode kostte:", lengte_oud, "seconde!")
+print("Nieuwe methode kostte:", lengte_nieuw, "seconde!")
+print("De runtime is", factor_korter, "keer korter.")
+
 ```
 
 Idealiter draaien we de bovenstaande code een aantal keer zodat we een goede schatting hebben van de rekentijd.
