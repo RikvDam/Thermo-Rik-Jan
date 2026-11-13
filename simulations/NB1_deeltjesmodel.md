@@ -561,6 +561,12 @@ Test wederom je code door de vernieuwde functie hierboven te plakken.
 ```python tags=["NB1_hardewand"]
 # harde wanden
 def update(frame):
+    if particle.r[0] > 10 - particle.R or particle.r[0] < -10 + particle.R:
+        particle.v[0] = -particle.v[0]
+        
+
+    if particle.r[1] > 10 - particle.R or particle.r[1] < -10 + particle.R:
+        particle.v[1] = -particle.v[1]
     particle.update_position()
     dot.set_data([particle.r[0]], [particle.r[1]])
 ### YOUR CODE HERE ###
@@ -579,6 +585,11 @@ dt = 0.1         # time step
 num_steps = 500  # number of time steps
 
 ### YOUR CODE HERE ###
+particle = ParticleClass(m=1.0, v=[5.0, 3.0], r=[0.0, 0.0], R=1.0)
+if particle.r[0]**2 > 100:
+    particle.v[0] = -particle.v[0]
+if particle.r[1]**2 > 100:
+    particle.v[1] = -particle.v[1]
 
 # Create the figure and axis
 fig, ax = plt.subplots()
@@ -598,12 +609,12 @@ def init():
     return dot,
 
 # Update function for each frame
-def update(frame):
+'''def update(frame):
     particle.update_position()
     dot.set_data([particle.r[0]], [particle.r[1]])
     ### YOUR CODE HERE ###
     return dot,
-
+'''
 # Create animation
 ani = FuncAnimation(fig, update, frames=range(200), init_func=init, blit=True, interval=50)
 
