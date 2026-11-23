@@ -223,7 +223,14 @@ Schrijf een functie die de temperatuur van het gas in onze simulatie bepaalt:
 ```python tags=["NB3_tempfun"]
 def temperature(particles) -> float:
     temp = 0.0 
-    ### YOUR CODE HERE ###
+    m = 1.0
+    f=2
+    k = 1.380649 * 10**(-23)
+    vtotaal = []
+    for p in particles:
+        vtotaal.append( (p.v[0]**2)+(p.v[1]**2))
+    v = np.mean(vtotaal)
+    temp =(m*(v))/(f*k)
     return temp
 ```
 
@@ -243,16 +250,17 @@ temperatures = np.zeros(100, dtype=float)
 times = np.linspace(1, 100, 100)
 
 create_particles(particles)
-for i in range(100):
-    take_time_step(particles)
-    # vastleggen van temperatuur per tijdstap
-    ### YOUR CODE HERE ###
+
 
 plt.figure()
 plt.xlabel('Time')
 plt.ylabel('Temperature')
-# plotten van tijd tegen temperatuur
-### YOUR CODE HERE ###
+for i in range(100):
+    take_time_step(particles)
+    # vastleggen van temperatuur per tijdstap
+    temperatures[i] = temperature(particles)
+    # plotten van tijd tegen temperatuur
+plt.plot(times,temperatures,"k.", label="temperatuur uitgezet tegen de tijd")
 plt.show()
 ```
 
@@ -326,7 +334,10 @@ def handle_walls(particles):
     for p in particles:
         left_right_collision(p)
         top_down_collision(p)
+    
     pressure = (impulse_outward) / (4 * BOX_SIZE_0 * DT)  # omtrek volume is oppervlak (2D sim)
+    print(pressure)
+    
 
 ```
 
@@ -344,10 +355,15 @@ Wat zou je als verklaring hiervoor geven?
 
 ```python tags=["NB3_plot_pres"]
 particles = []
+create_particles(particles)
 pressures = np.zeros(100, dtype=float)
 times = np.linspace(1, 100, 100)
 
-### YOUR CODE HERE ###
+for i in range(len(times)):
+  
+    take_time_step(particles)
+    
+    pressures[i] = pressure
 
 plt.figure()
 plt.xlabel('Time [step]')
@@ -376,8 +392,7 @@ Zet je initiële waarden weer terug.
 <!-- #endregion -->
 
 ```python tags=[]
-### YOUR CODE HERE ###
-
+#De grafiek ziet er wat minder piekerig uit, omdat er vaker botsingen plaatsvinden
 ```
 
 Een goedkoper alternatief bestaat uit het middelen van de druk over de tijd.
