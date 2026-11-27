@@ -223,7 +223,14 @@ Schrijf een functie die de temperatuur van het gas in onze simulatie bepaalt:
 ```python tags=["NB3_tempfun"]
 def temperature(particles) -> float:
     temp = 0.0 
-    ### YOUR CODE HERE ###
+    m = 1.0
+    f=2
+    k = 1.380649 * 10**(-23)
+    vtotaal = []
+    for p in particles:
+        vtotaal.append( (p.v[0]**2)+(p.v[1]**2))
+    v = np.mean(vtotaal)
+    temp =(m*(v))/(f*k)
     return temp
 ```
 
@@ -243,16 +250,17 @@ temperatures = np.zeros(100, dtype=float)
 times = np.linspace(1, 100, 100)
 
 create_particles(particles)
-for i in range(100):
-    take_time_step(particles)
-    # vastleggen van temperatuur per tijdstap
-    ### YOUR CODE HERE ###
+
 
 plt.figure()
 plt.xlabel('Time')
 plt.ylabel('Temperature')
-# plotten van tijd tegen temperatuur
-### YOUR CODE HERE ###
+for i in range(100):
+    take_time_step(particles)
+    # vastleggen van temperatuur per tijdstap
+    temperatures[i] = temperature(particles)
+    # plotten van tijd tegen temperatuur
+plt.plot(times,temperatures,"k.", label="temperatuur uitgezet tegen de tijd")
 plt.show()
 ```
 
@@ -326,7 +334,10 @@ def handle_walls(particles):
     for p in particles:
         left_right_collision(p)
         top_down_collision(p)
+    
     pressure = (impulse_outward) / (4 * BOX_SIZE_0 * DT)  # omtrek volume is oppervlak (2D sim)
+    print(pressure)
+    
 
 ```
 
@@ -344,10 +355,18 @@ Wat zou je als verklaring hiervoor geven?
 
 ```python tags=["NB3_plot_pres"]
 particles = []
+
+BOX_SIZE_0 = 10                # Hoogte en lengte startvolume
+N = 40      
+create_particles(particles)
 pressures = np.zeros(100, dtype=float)
 times = np.linspace(1, 100, 100)
 
-### YOUR CODE HERE ###
+for i in range(len(times)):
+  
+    take_time_step(particles)
+    
+    pressures[i] = pressure
 
 plt.figure()
 plt.xlabel('Time [step]')
@@ -376,8 +395,7 @@ Zet je initiële waarden weer terug.
 <!-- #endregion -->
 
 ```python tags=[]
-### YOUR CODE HERE ###
-
+#De grafiek heeft veel meer pieken, omdat er vaker botsingen plaatsvinden
 ```
 
 Een goedkoper alternatief bestaat uit het middelen van de druk over de tijd.
@@ -425,7 +443,22 @@ times = np.linspace(1, N_steps, N_steps)
 
 create_particles(particles)
 
-### YOUR CODE HERE ###
+BOX_SIZE_0 = 10                # Hoogte en lengte startvolume
+  
+
+for i in range(len(times)):
+  
+    take_time_step(particles)
+    
+    pressures[i] = pressure
+
+plt.figure()
+plt.xlabel('Time [step]')
+plt.ylabel('Pressure [a.u.]')
+
+plt.plot(times, pressures, '-r')
+
+plt.show()
 
 ```
 
@@ -437,7 +470,7 @@ We kunnen de gevonden druk nu wel uitdrukken in SI-eenheden met behulp van de vo
 ```
 
 ```{solution} ex-druktemp-7
-### YOUR CODE HERE ###
+Er zitten natuurlijk veel meer dan 500 deeltjes in de ruimte
 ```
 
 
@@ -449,7 +482,7 @@ Leg op basis van de vormen die je ziet en de bijbehorende wiskunde uit dat dit e
 ```
 
 ```{solution} ex-druktemp-8
-### YOUR CODE HERE ###
+De pieken nemen steeds expentioneel af. daarnaast reageert de grafiek heel plotseling op botsingen met de wand, wat een peik in de druk geeft. En natuurlijk wordt het uitlezen gedaan door naar het gemiddelde te kijken.
 ```
 
 
@@ -479,7 +512,8 @@ Controleer of je uitkomst overeenkomt met de theorie en verifieer hiermee de cod
 ```
 
 ```python
-### YOUR CODE HERE ###
+Druk = (1*500)/(10**2)*(1/2)
+print(Druk)
 ```
 
 In [de formule voor de tweedimensionale druk](2d_pressure) kan je de structuur van de ideale gaswet herkennen. 
@@ -493,7 +527,9 @@ Herleid dezelfde formule af voor het driedimensionale geval. Laat zien welke rel
 
 ```{solution} ex-druktemp9b
 Geef hier de relatie tussen de constanten...
-### YOUR CODE HERE ###
+p=(n*R*T)/V
+n*R*T is de totale energie, en dat is gelijk aan N keer 0.5*m*v^2 oftewel mN* (v**2)/2 is dat ook.
+V is het volume, maar omdat het hier om 2d gaat wordt dat de oppervlakte A
 ```
 
 
