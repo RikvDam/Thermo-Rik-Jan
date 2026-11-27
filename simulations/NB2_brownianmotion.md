@@ -49,6 +49,19 @@ Als model gaan we uit van een deel van het volume van een fietsband die onder ee
 
 ```{solution} ex-recap-1
 ### YOUR CODE HERE ###
+```python
+import numpy as np
+
+kB = 1.380649e-23
+T = 293
+p = 10 * 1e5
+
+V_molecuul = kB * T / p
+L = V_molecuul ** (1 / 3)
+oppervlak = V_molecuul ** (2 / 3)
+
+print(f"V_molecuul = {V_molecuul:.2e} m^3")
+print(f"Ribbe = {L * 1e9:.2f} nm")
 ```
 
 De simulatie die we gaan maken bevat maar twee dimensies. We kunnen het oppervlak per deeltje in deze simulatie daarom kiezen als het zojuist berekende $V_\text{molecuul}^{2/3}$.
@@ -69,6 +82,12 @@ Ook deze heb je hierna nodig.
 
 ```{solution} ex-recap-2
 ### YOUR CODE HERE ###
+``` python
+f = 2
+m = 28 * 1.66054e-27
+
+v = np.sqrt(f * kB * T / m)
+print(f"v = {v:.1e} m/s")
 ```
 
 ```{exercise} Radius
@@ -78,6 +97,18 @@ In de python cell hieronder staan enkele waarden gegeven. Het aantal deeltjes $N
 
 ```{solution} ex-recap-3
 ### YOUR CODE HERE ###
+```python
+BOX_SIZE_0 = 10
+N = 40
+RADIUS = 0.3
+
+opp_sim = BOX_SIZE_0**2 / N
+eenheid = np.sqrt(oppervlak / opp_sim)
+print(f"1 lengte-eenheid = {eenheid * 1e9:.2f} nm")
+print(f"RADIUS = {RADIUS * eenheid * 1e9:.2f} nm")
+
+fractie = N * np.pi * RADIUS**2 / BOX_SIZE_0**2
+print(f"Bedekte fractie = {fractie:.0%}")
 ```
 
 ```{exercise} DT
@@ -88,11 +119,13 @@ Bekijk de waarde van `DT`. Hoe zorgt deze waaarde ervoor dat het onwaarschijnlij
 Onze simulatie modelleert dus een klein systeem zonder rekening te houden met de kracht tussen de luchtmoleculen. Je zult zien dat we toch al behoorlijk wat van de processor vragen om deze berekeningen te doen. Om een meer realistische modelsimulatie te maken is daarom een serieuze uitdaging, die veel wiskunde en programmeerervaring vraagt. Op dit ogenblik wordt dit bijvoorbeeld gevraagd bij een van de eerste opdrachten van het vak 'Computational Physics' van de master Applied Physics. 
 
 ```python tags=["NB2_init"] editable=true slideshow={"slide_type": ""}
-BOX_SIZE_0 = 10                # Hoogte en lengte startvolume
-N = 40                         # Aantal deeltjes
-V_0 = 1                        # Startsnelheid van deeltjes
-RADIUS = 0.3                   # Straal van moleculen
-DT = 0.1 * RADIUS / V_0        # Tijdstap om geen botsing te missen
+BOX_SIZE_0 = 10                # Hoogte en lengte startvolume (nm)
+N = 40                         # Aantal deeltjes (demensieloos)
+V_0 = 1                        # Startsnelheid van deeltjes (4e2 m/s)
+RADIUS = 0.3                   # Straal van moleculen (0.3 nm)
+DT = 0.1 * RADIUS / V_0        # Tijdstap om geen botsing te missen (2.5 ps)
+
+#Door de ps is de dt enorm klein, hoe kleiner dt, hoe kleiner de kans is dat een botsing gemist word. Plus DT is 5% van de diameter van het deeltje, daardoor is een contactpunt snel gevonden
 ```
 
 ### Particle class
@@ -140,7 +173,7 @@ def particle_collision(p1: ParticleClass, p2: ParticleClass):
     dot_product = np.dot(delta_r, delta_v)
 
     # Als deeltjes van elkaar weg bewegen dan geen botsing
-    if dot_product >= 0: # '='-teken voorkomt ook problemen als delta_r == \vec{0}
+    if dot_product >= 0: # '='-teken voorkomt ook problemen als $delta_r == \vec{0}$
         return
         
     distance_squared = np.dot(delta_r, delta_r) 
@@ -185,12 +218,13 @@ Leg uit dat d.m.v. onderstaande code de deeltjes allemaal dezelfde snelheid hebb
 ```{solution} ex-recap-5
 Jouw antwoord hier...
 ### YOUR CODE HERE ###
+Er worden 40 deeltjes gemaakt (N) en daarvan word de vx met een random.uniform verdeeld over de vx. vy hangt af van vx, dus deze word ook netjes verdeeld. De positie word in een keer uniform verdeeld over de box_size.
 ```
 
 ```python tags=["NB2_init"] editable=true slideshow={"slide_type": ""}
 def create_particles(particles):
     ''' Leegmaken en opnieuw aanmaken van deeltjes '''
-    particles.clear
+    particles.clear()
     for i in range(N):
         vx = np.random.uniform(-V_0, V_0)
         vy = np.random.choice([-1, 1]) * np.sqrt(V_0**2 - vx**2)        
@@ -211,6 +245,7 @@ Leg uit hoe er in onderstaande code wordt voorkomen dat de botsing tussen twee d
 ```{solution} ex-recap-6
 Jouw antwoord hier...
 ### YOUR CODE HERE ###
+De binnenste lus loopt over `j in range(i+1, num_particles)`. Daardoor geldt altijd `j > i`, dus elk paar (i, j) wordt precies één keer gecontroleerd. Het omgekeerde paar (j, i) komt nooit voor, omdat j dan kleiner zou zijn dan i. Zo wordt een botsing tussen twee deeltjes niet dubbel uitgevoerd.
 ```
 
 ```python editable=true slideshow={"slide_type": ""} tags=["NB2_init"]
@@ -312,17 +347,26 @@ Voeg aan de simulatie een regel toe die voor elke tijdstap bepaalt wat de totale
 
 ```python tags=["NB2_ex7"]
 # plotten van kinetische energie als functie van tijd
-
+%matplotlib widget
 particles = []
-energy_tot = []
+E_t = []
 create_particles(particles)
 for i in range(100):
     take_time_step(particles)
-    # voeg de som van de kinetische energie in deze stap toe aan energy_tot 
-    ### YOUR CODE HERE ###
+    E_t.append(sum(p.kin_energy for p in particles))
+    E_tc = E_t
 
-# plot de figuur van de kinetische energie als functie van de tijd. 
-### YOUR CODE HERE ###
+fig, ax = plt.subplots()
+fig.canvas.toolbar_visible = True
+fig.canvas.footer_visible = True  # Toont live (x, y)-coördinaten rechtsonder
+
+ax.plot(np.arange(100) * DT, E_t)
+ax.set_ylim(0, 1.2 * max(E_t))
+ax.set_xlabel('tijd')
+ax.set_ylabel('totale kinetische energie')
+plt.show()
+
+
 ```
 
 ```{exercise} 
@@ -332,7 +376,8 @@ Als je heel nauwkeurig naar de waarde voor de totale kinetische energie kijkt, d
 
 ```{solution} ex-recap-8
 Jouw antwoord hier...
-### YOUR CODE HERE ###
+
+De totale energie is 20 (40 deeltjes met m = 1 en |v| = 1). De variatie is van de orde 10⁻¹⁴ (gemeten: 7×10⁻¹⁵ tot 1,1×10⁻¹⁴ over 100 stappen). De formules in `particle_collision` behouden impuls en energie exact. De oorzaak is dus afrondfouten van floating point, niet de wiskunde.
 ```
 
 
@@ -520,7 +565,8 @@ Voeg voor deze regel goede metadata toe.
 ```
 
 ```{solution} ex-brownian-1
-### YOUR CODE HERE ###
+De laatste regel voegt één zwaar deeltje toe aan de lijst: massa 20 (20 keer zwaarder dan de lichte deeltjes), in rust (`v=[0, 0]`), in het midden (`r=[0, 0]`), straal 0,5 en rood. Het is het laatste element, dus `particles[N-1]`.
+
 ```
 
 
@@ -559,7 +605,7 @@ Hoe wordt er voor gezorgd dat de snelheid van elk deeltje gelijk is?
 ```
 
 ```{solution} ex-brownian-2
-### YOUR CODE HERE ###
+De uitgecommentarieerde code tekent bij elk deeltje een pijl vanaf de positie met als richting en lengte de snelheid. Elk deeltje heeft dezelfde snelheid omdat `vx` uniform in [-v_0, v_0] wordt gekozen en `vy = ±sqrt(v_0² - vx²)`. Dan is `vx² + vy² = v_0²`, dus |v| = v_0. Het zware deeltje is de uitzondering, want dat start met v = 0.
 ```
 
 We gaan nu de functies van de simulatie weer aanroepen:
@@ -581,22 +627,25 @@ def particle_collision(p1: ParticleClass, p2: ParticleClass):
     
     # Als deeltjes van elkaar weg bewegen dan geen botsing
     if dot_product >= 0: # '='-teken voorkomt ook problemen als delta_r == \vec{0}
-        return
+        return False
     
     distance_squared = np.dot(delta_r, delta_r) 
     # Botsing oplossen volgens elastische botsing in 2D
     p1.v -= 2 * m2 / (m1 + m2) * dot_product / distance_squared * delta_r
     p2.v += 2 * m1 / (m1 + m2) * dot_product / distance_squared * delta_r
+    return True
 
 def handle_collisions(particles):
     ### YOUR CODE HERE ###
     """ alle onderlinge botsingen afhandelen voor deeltjes in lijst """
+    counter = 0
     num_particles = len(particles)
     for i in range(num_particles):
         for j in range(i+1, num_particles):
             if collide_detection(particles[i], particles[j]):
-                particle_collision(particles[i], particles[j])
-                ### YOUR CODE HERE ###
+               if particle_collision(particles[i], particles[j]):
+                   counter +=1
+    return counter
 
 ```
 
@@ -639,7 +688,6 @@ from matplotlib.animation import FuncAnimation
 from IPython.display import HTML
 from matplotlib.animation import FFMpegWriter
 
-
 # ---- tracking arrays ----
 track_x, track_y = [], []          # zwaar deeltje (bijv. particles[N-1])
 track_x2, track_y2 = [], []        # tweede deeltje (bijv. particles[0])
@@ -673,15 +721,13 @@ def init():
     return dots, heavy_dot, light_dot, heavy_path, light_path
 
 def update(frame):
-    counter = 0
 
     for p in particles:
         p.update_position()
         p.boxcollision()
 
-    handle_collisions(particles)
 
-    botsingen.append(counter)
+    botsingen.append(handle_collisions(particles))
 
     # ---- track punten ----
     track_x.append(particles[N-1].r[0])
@@ -728,7 +774,9 @@ ani.save("deeltjes.gif", writer="pillow", fps=20)
 ```
 
 ```{solution} ex-brownian-3
-### YOUR CODE HERE ###
+beide deeltjes volgen een willekeurig pad zonder voorkeursrichting. De richting verandert alleen bij botsingen met andere deeltjes of met de wand.
+- Het lichte deeltje legt in 400 stappen een pad van 14 tot 18 af, in rechte stukken met scherpe knikken, en komt door een groot deel van de box.
+- Het zware deeltje (m = 20) beweegt schokkerig en langzaam. Zijn pad is 1,7 tot 2,8 lang en hij blijft 0,9 tot 1,8 van het startpunt. Een botsing met een licht deeltje verandert zijn snelheid maar weinig, omdat hij 20 keer zwaarder is.
 ```
 
 
@@ -742,7 +790,14 @@ Plot hieronder het aantal botsingen als functie van de tijd.
 ```
 
 ```python
-### YOUR CODE HERE ###
+botsingen_run = botsingen[400:]
+t = np.arange(400) * dt
+
+plt.figure()
+plt.plot(t, botsingen_run)
+plt.xlabel('tijd')
+plt.ylabel('aantal botsingen per tijdstap')
+plt.show()
 ```
 
 ```{warning} 🌶 Let op!
