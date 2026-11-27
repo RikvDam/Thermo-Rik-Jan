@@ -355,6 +355,9 @@ Wat zou je als verklaring hiervoor geven?
 
 ```python tags=["NB3_plot_pres"]
 particles = []
+
+BOX_SIZE_0 = 10                # Hoogte en lengte startvolume
+N = 40      
 create_particles(particles)
 pressures = np.zeros(100, dtype=float)
 times = np.linspace(1, 100, 100)
@@ -392,7 +395,7 @@ Zet je initiële waarden weer terug.
 <!-- #endregion -->
 
 ```python tags=[]
-#De grafiek ziet er wat minder piekerig uit, omdat er vaker botsingen plaatsvinden
+#De grafiek heeft veel meer pieken, omdat er vaker botsingen plaatsvinden
 ```
 
 Een goedkoper alternatief bestaat uit het middelen van de druk over de tijd.
@@ -440,7 +443,22 @@ times = np.linspace(1, N_steps, N_steps)
 
 create_particles(particles)
 
-### YOUR CODE HERE ###
+BOX_SIZE_0 = 10                # Hoogte en lengte startvolume
+  
+
+for i in range(len(times)):
+  
+    take_time_step(particles)
+    
+    pressures[i] = pressure
+
+plt.figure()
+plt.xlabel('Time [step]')
+plt.ylabel('Pressure [a.u.]')
+
+plt.plot(times, pressures, '-r')
+
+plt.show()
 
 ```
 
@@ -452,7 +470,7 @@ We kunnen de gevonden druk nu wel uitdrukken in SI-eenheden met behulp van de vo
 ```
 
 ```{solution} ex-druktemp-7
-### YOUR CODE HERE ###
+Er zitten natuurlijk veel meer dan 500 deeltjes in de ruimte
 ```
 
 
@@ -464,7 +482,7 @@ Leg op basis van de vormen die je ziet en de bijbehorende wiskunde uit dat dit e
 ```
 
 ```{solution} ex-druktemp-8
-### YOUR CODE HERE ###
+De pieken nemen steeds expentioneel af. daarnaast reageert de grafiek heel plotseling op botsingen met de wand, wat een peik in de druk geeft. En natuurlijk wordt het uitlezen gedaan door naar het gemiddelde te kijken.
 ```
 
 
@@ -494,7 +512,8 @@ Controleer of je uitkomst overeenkomt met de theorie en verifieer hiermee de cod
 ```
 
 ```python
-### YOUR CODE HERE ###
+Druk = (1*500)/(10**2)*(1/2)
+print(Druk)
 ```
 
 In [de formule voor de tweedimensionale druk](2d_pressure) kan je de structuur van de ideale gaswet herkennen. 
@@ -508,7 +527,9 @@ Herleid dezelfde formule af voor het driedimensionale geval. Laat zien welke rel
 
 ```{solution} ex-druktemp9b
 Geef hier de relatie tussen de constanten...
-### YOUR CODE HERE ###
+p=(n*R*T)/V
+n*R*T is de totale energie, en dat is gelijk aan N keer 0.5*m*v^2 oftewel mN* (v**2)/2 is dat ook.
+V is het volume, maar omdat het hier om 2d gaat wordt dat de oppervlakte A
 ```
 
 
